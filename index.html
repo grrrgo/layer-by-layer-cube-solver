@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rubix solver</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="angular.min.js"></script>
+    <script src="app.js"></script>
+</head>
+<body ng-app="app">
+    <div ng-controller="cubeController">
+        <div class="cube-face {{face}}" ng-repeat="(face, matrix) in cube.faces">
+            <div class="tile-row" ng-repeat="rows in matrix">
+                <div ng-repeat="tile in rows track by $index" class="cube-tile {{$parent.$index}}-{{$index}} {{tile}}">
+                    <div>{{$parent.$index}}-{{$index}}<br>
+                    {{tile}}<br>
+                    {{face}}</div>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <!--<button ng-click="cube.R()">R</button>
+        <button ng-click="cube.R(true)">R'</button>
+        <br>
+        <button ng-click="cube.L()">L</button>
+        <button ng-click="cube.L(true)">L'</button>
+        <br>
+        <button ng-click="cube.U()">U</button>
+        <button ng-click="cube.U(true)">U'</button>
+        <br>
+        <button ng-click="cube.D()">D</button>
+        <button ng-click="cube.D(true)">D'</button>
+        <br>
+        <button ng-click="cube.F()">F</button>
+        <button ng-click="cube.F(true)">F'</button>
+        <br>
+        <button ng-click="cube.B()">B</button>
+        <button ng-click="cube.B(true)">B'</button>
+        <br>-->
+        <button ng-click="cube.scramble()">Scramble</button>
+        <br>
+        <button ng-click="cube.reset()">Reset</button>
+        <br>
+        <button ng-click="cube.cross()">Cross</button>
+
+        <div class="step-panel">
+            <h2>{{cube.scrambleSteps}}</h2>
+            <!--<h4>{{cube.manualScrambleSteps}}</h4>-->
+            <span ng-if="cube.steps.one">Step one (cross) : {{cube.steps.one}}</span>
+            <span ng-if="cube.steps.two">Step two (L1 corners) : {{cube.steps.two}}</span>
+            <span ng-if="cube.steps.three">Step three (L2 edges) : {{cube.steps.three}}</span>
+            <span ng-if="cube.steps.four">Step four (Top cross) : {{cube.steps.four}}</span>
+            <span ng-if="cube.steps.five">Step five (OLL) : {{cube.steps.five}}</span>
+            <span ng-if="cube.steps.six">Step six (Top corners PLL) : {{cube.steps.six}}</span>
+            <span ng-if="cube.steps.seven">Step seven (Top edges PLL) : {{cube.steps.seven}}</span>
+        </div>
+
+
+
+    </div>
+</body>
+</html>
