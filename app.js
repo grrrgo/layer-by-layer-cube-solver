@@ -6,10 +6,45 @@ var app = angular.module('app', []);
 app.controller('cubeController', function($scope) {
     var tileCount = [0, 1, 2], reverseTileCount = [2, 1, 0];
 
-    var aggregateSteps = function (steps) {
-        
+    var combineSteps = function (steps) {
+        var moves = steps.split(',');
+        moves.splice(moves.length - 1, 1);
+        console.log('before combining', moves);
+        moves.map(function (move, index) {
+            if (index != moves.length - 1) {
+                if (move == moves[index + 1] + '\'' || move + '\'' == moves[index + 1]) {
+                    moves.splice(index, 2)
+                }
+            }
+        });
+        moves.map(function (move, index) {
+            var repetition = 1, originalIndex = index;
+            while (true) {
+                if (move == moves[index + 1]) {
+                    repetition += 1;
+                    index += 1;
+                } else {
+                    switch (repetition) {
+                        case 2:
+                            moves[originalIndex] = move + String(repetition);
+                            break;
+                        case 3:
+                            moves[originalIndex] = move.indexOf('\'')>=0 ? move[0] : move+'\'';
+                            break;
+                        case 4:
+                            moves[originalIndex] = '';
+                            break;
+
+                    }
+                    moves.splice(originalIndex + 1, repetition - 1);
+                    break
+                }
+            }
+        });
+        console.log('after combining', moves);
+        return moves.filter(function(n){ return n != '' }).join(', ')
     };
-    
+
     $scope.cube = {
         faces:{},
         scrambleSteps: '',
@@ -58,6 +93,15 @@ app.controller('cubeController', function($scope) {
         ];
         $scope.cube.scrambleSteps = '';
         $scope.cube.manualScrambleSteps = ''
+        $scope.cube.steps = {
+            'one':'',
+            'two':'',
+            'three':'',
+            'four':'',
+            'five':'',
+            'six':'',
+            'seven':''
+        }
     };
 
     $scope.cube.R = function (prime) {
@@ -79,7 +123,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.down[reverseTileCount[i]][0] = originalFront[i][2];
                 $scope.cube.faces.back[reverseTileCount[i]][2] = originalDown[i][0];
             }
-            $scope.cube.manualScrambleSteps += 'R\', '
+            $scope.cube.manualScrambleSteps += 'R\','
         } else {
             for (i in tileCount) {
                 $scope.cube.faces.right[0][i] = originalRight[reverseTileCount[i]][0];
@@ -92,7 +136,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.up[i][2] = originalFront[i][2];
                 $scope.cube.faces.back[i][2] = originalUp[i][2];
             }
-            $scope.cube.manualScrambleSteps += 'R, '
+            $scope.cube.manualScrambleSteps += 'R,'
         }
     };
 
@@ -115,7 +159,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.up[i][0] = originalFront[i][0];
                 $scope.cube.faces.back[i][0] = originalUp[i][0];
             }
-            $scope.cube.manualScrambleSteps += 'L\', '
+            $scope.cube.manualScrambleSteps += 'L\','
         } else {
             for (i in tileCount) {
                 $scope.cube.faces.left[i][0] = originalLeft[2][i];
@@ -128,7 +172,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.down[i][2] = originalFront[reverseTileCount[i]][0];
                 $scope.cube.faces.back[i][0] = originalDown[reverseTileCount[i]][2];
             }
-            $scope.cube.manualScrambleSteps += 'L, '
+            $scope.cube.manualScrambleSteps += 'L,'
         }
     };
 
@@ -151,7 +195,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.right[reverseTileCount[i]][0] = originalFront[0][i];
                 $scope.cube.faces.back[2][i] = originalRight[i][0];
             }
-            $scope.cube.manualScrambleSteps += 'U\', '
+            $scope.cube.manualScrambleSteps += 'U\','
         } else {
             for (i in tileCount) {
                 $scope.cube.faces.up[i][2] = originalUp[0][i];
@@ -164,7 +208,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.left[i][2] = originalFront[0][i];
                 $scope.cube.faces.back[2][i] = originalLeft[reverseTileCount[i]][2];
             }
-            $scope.cube.manualScrambleSteps += 'U, '
+            $scope.cube.manualScrambleSteps += 'U,'
         }
     };
 
@@ -187,7 +231,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.left[i][0] = originalFront[2][i];
                 $scope.cube.faces.back[0][i] = originalLeft[reverseTileCount[i]][0];
             }
-            $scope.cube.manualScrambleSteps += 'D\', '
+            $scope.cube.manualScrambleSteps += 'D\','
         } else {
             for (i in tileCount) {
                 $scope.cube.faces.down[i][2] = originalDown[0][i];
@@ -200,7 +244,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.right[reverseTileCount[i]][2] = originalFront[2][i];
                 $scope.cube.faces.back[0][i] = originalRight[i][2];
             }
-            $scope.cube.manualScrambleSteps += 'D, '
+            $scope.cube.manualScrambleSteps += 'D,'
         }
     };
 
@@ -223,7 +267,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.down[2][i] = originalLeft[2][i];
                 $scope.cube.faces.up[2][i] = originalRight[2][i];
             }
-            $scope.cube.manualScrambleSteps += 'F\', '
+            $scope.cube.manualScrambleSteps += 'F\','
         } else {
             for (i in tileCount) {
                 $scope.cube.faces.front[i][2] = originalFront[0][i];
@@ -236,7 +280,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.left[2][i] = originalDown[2][i];
                 $scope.cube.faces.up[2][i] = originalLeft[2][i];
             }
-            $scope.cube.manualScrambleSteps += 'F, '
+            $scope.cube.manualScrambleSteps += 'F,'
         }
     };
 
@@ -259,7 +303,7 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.down[0][i] = originalRight[0][i];
                 $scope.cube.faces.up[0][i] = originalLeft[0][i];
             }
-            $scope.cube.manualScrambleSteps += 'B\', '
+            $scope.cube.manualScrambleSteps += 'B\','
         } else {
             for (i in tileCount) {
                 $scope.cube.faces.back[i][2] = originalBack[0][i];
@@ -272,11 +316,11 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.left[0][i] = originalUp[0][i];
                 $scope.cube.faces.up[0][i] = originalRight[0][i];
             }
-            $scope.cube.manualScrambleSteps += 'B, '
+            $scope.cube.manualScrambleSteps += 'B,'
         }
     };
 
-    $scope.cube.executeAlgorithm = function (algorithmArray) {
+    var executeAlgorithm = function (algorithmArray) {
         console.log(algorithmArray.join(', '));
         var step;
         for (var index in algorithmArray) {
@@ -304,7 +348,7 @@ app.controller('cubeController', function($scope) {
     $scope.cube.scramble = function () {
         $scope.cube.reset();
         var moves = ['R', 'R\'', 'L', 'L\'', 'U', 'U\'', 'D', 'D\'', 'F', 'F\'', 'B', 'B\''];
-        var i, steps=[];
+        var steps=[];
         while (true) {
             var randomIndex = Math.floor(Math.random()*12);
             if (steps.length >= 1) {
@@ -334,41 +378,36 @@ app.controller('cubeController', function($scope) {
 
             steps.push(moves[randomIndex]);
 
-            if (steps.length == 3) {
+            if (steps.length == 20) {
                 break;
             }
         }
 
-        $scope.cube.executeAlgorithm(steps);
+        executeAlgorithm(steps);
 
         $scope.cube.scrambleSteps = steps.join(', ');
         console.log('scrambleSteps', $scope.cube.scrambleSteps);
     };
 
+    //step 1
     $scope.cube.cross = function() {
         $scope.cube.manualScrambleSteps ='';
         $scope.cube.steps.one = '';
 
-        var steps = [],
+        var order,
             edgeSolved = {},
             faces = ['up', 'front', 'left', 'right', 'back'];
 
-        var getLeftAndRight = function (index) {
-            return {
-                'left':(index-1>=0)?order[index-1]:order[3],
-                'right':(index+1<=3)?order[index+1]:order[0]
-            };
-        };
-
         var orientCross = function () {
-            var redIndex = order.indexOf('red');
-            if (redIndex == 1) {
-                $scope.cube.executeAlgorithm(['D\''])
-            } else if (redIndex == 2) {
-                $scope.cube.executeAlgorithm(['D2'])
-            } else if (redIndex == 3) {
-                $scope.cube.executeAlgorithm(['D'])
+            while (true) {
+                var matching = countBottomEdgesMatch();
+                if (matching.count !== 2 && matching.count !== 4) {
+                    executeAlgorithm(['D']);
+                } else {
+                    break
+                }
             }
+            return matching;
         };
 
         var findWhiteEdges = function (face) {
@@ -411,16 +450,16 @@ app.controller('cubeController', function($scope) {
             var solveForFront = function() {
                 switch (firstEdgeWithWhite.white) {
                     case '0-1':
-                        $scope.cube.executeAlgorithm(['F', 'R\'', 'F\'']);
+                        executeAlgorithm(['F', 'R\'', 'F\'']);
                         break;
                     case '1-0':
-                        $scope.cube.executeAlgorithm(['F2', 'R\'', 'F2']);
+                        executeAlgorithm(['F2', 'R\'', 'F2']);
                         break;
                     case '1-2':
-                        $scope.cube.executeAlgorithm(['R\'']);
+                        executeAlgorithm(['R\'']);
                         break;
                     case '2-1':
-                        $scope.cube.executeAlgorithm(['F\'', 'R\'']);
+                        executeAlgorithm(['F\'', 'R\'']);
                         break;
                 }
             };
@@ -428,16 +467,16 @@ app.controller('cubeController', function($scope) {
             var solveForBack = function () {
                 switch (firstEdgeWithWhite.white) {
                     case '0-1':
-                        $scope.cube.executeAlgorithm(['B', 'R', 'B\'']);
+                        executeAlgorithm(['B', 'R', 'B\'']);
                         break;
                     case '1-0':
-                        $scope.cube.executeAlgorithm(['B2', 'R', 'B2']);
+                        executeAlgorithm(['B2', 'R', 'B2']);
                         break;
                     case '1-2':
-                        $scope.cube.executeAlgorithm(['R']);
+                        executeAlgorithm(['R']);
                         break;
                     case '2-1':
-                        $scope.cube.executeAlgorithm(['B\'', 'R', 'B']);
+                        executeAlgorithm(['B\'', 'R', 'B']);
                         break;
                 }
             };
@@ -445,16 +484,16 @@ app.controller('cubeController', function($scope) {
             var solveForLeft = function () {
                 switch (firstEdgeWithWhite.white) {
                     case '0-1':
-                        $scope.cube.executeAlgorithm(['L2', 'F\'', 'L2']);
+                        executeAlgorithm(['L2', 'F\'', 'L2']);
                         break;
                     case '1-0':
-                        $scope.cube.executeAlgorithm(['L\'','F\'', 'L']);
+                        executeAlgorithm(['L\'','F\'', 'L']);
                         break;
                     case '1-2':
-                        $scope.cube.executeAlgorithm(['L', 'F\'', 'L\'']);
+                        executeAlgorithm(['L', 'F\'', 'L\'']);
                         break;
                     case '2-1':
-                        $scope.cube.executeAlgorithm(['F\'']);
+                        executeAlgorithm(['F\'']);
                         break;
                 }
             };
@@ -462,16 +501,16 @@ app.controller('cubeController', function($scope) {
             var solveForRight = function () {
                 switch (firstEdgeWithWhite.white) {
                     case '0-1':
-                        $scope.cube.executeAlgorithm(['R2', 'F', 'R2']);
+                        executeAlgorithm(['R2', 'F', 'R2']);
                         break;
                     case '1-0':
-                        $scope.cube.executeAlgorithm(['R\'', 'F', 'R']);
+                        executeAlgorithm(['R\'', 'F', 'R']);
                         break;
                     case '1-2':
-                        $scope.cube.executeAlgorithm(['R', 'F', 'R\'']);
+                        executeAlgorithm(['R', 'F', 'R\'']);
                         break;
                     case '2-1':
-                        $scope.cube.executeAlgorithm(['F']);
+                        executeAlgorithm(['F']);
                         break;
                 }
             };
@@ -479,16 +518,16 @@ app.controller('cubeController', function($scope) {
             var solveForUp = function () {
                 switch (firstEdgeWithWhite.white) {
                     case '0-1':
-                        $scope.cube.executeAlgorithm(['U2', 'F2']);
+                        executeAlgorithm(['U2', 'F2']);
                         break;
                     case '1-0':
-                        $scope.cube.executeAlgorithm(['U\'', 'F2']);
+                        executeAlgorithm(['U\'', 'F2']);
                         break;
                     case '1-2':
-                        $scope.cube.executeAlgorithm(['U', 'F2']);
+                        executeAlgorithm(['U', 'F2']);
                         break;
                     case '2-1':
-                        $scope.cube.executeAlgorithm(['F2']);
+                        executeAlgorithm(['F2']);
                         break;
                 }
             };
@@ -504,19 +543,19 @@ app.controller('cubeController', function($scope) {
                 case 'front':
                     console.log('solving front white piece...');
                     if (bottomWhiteTiles.indexOf('right') >= 0) {
-                        firstEdgeWithWhite.white == '2-1'?$scope.cube.executeAlgorithm(['F\'']):undefined;
+                        firstEdgeWithWhite.white == '2-1'?executeAlgorithm(['F\'']):undefined;
                         switch (avaliableEdges[0]) {
                             case 'front':
-                                $scope.cube.executeAlgorithm(['D']);
+                                executeAlgorithm(['D']);
                                 break;
                             case 'left':
-                                $scope.cube.executeAlgorithm(['D2']);
+                                executeAlgorithm(['D2']);
                                 break;
                             case 'back':
-                                $scope.cube.executeAlgorithm(['D\'']);
+                                executeAlgorithm(['D\'']);
                                 break;
                         }
-                        firstEdgeWithWhite.white == '2-1'?$scope.cube.executeAlgorithm(['F']):undefined;
+                        firstEdgeWithWhite.white == '2-1'?executeAlgorithm(['F']):undefined;
                         solveForFront()
                     } else {
                         solveForFront()
@@ -525,19 +564,19 @@ app.controller('cubeController', function($scope) {
                 case 'back':
                     console.log('solving back white piece...');
                     if (bottomWhiteTiles.indexOf('right') >= 0) {
-                        firstEdgeWithWhite.white == '0-1'?$scope.cube.executeAlgorithm(['B\'']):undefined;
+                        firstEdgeWithWhite.white == '0-1'?executeAlgorithm(['B\'']):undefined;
                         switch (avaliableEdges[0]) {
                             case 'front':
-                                $scope.cube.executeAlgorithm(['D']);
+                                executeAlgorithm(['D']);
                                 break;
                             case 'left':
-                                $scope.cube.executeAlgorithm(['D2']);
+                                executeAlgorithm(['D2']);
                                 break;
                             case 'back':
-                                $scope.cube.executeAlgorithm(['D\'']);
+                                executeAlgorithm(['D\'']);
                                 break;
                         }
-                        firstEdgeWithWhite.white == '0-1'?$scope.cube.executeAlgorithm(['B']):undefined;
+                        firstEdgeWithWhite.white == '0-1'?executeAlgorithm(['B']):undefined;
                         solveForBack()
                     } else {
                         solveForBack()
@@ -546,19 +585,19 @@ app.controller('cubeController', function($scope) {
                 case 'left':
                     console.log('solving left white piece...');
                     if (bottomWhiteTiles.indexOf('front') >= 0) {
-                        firstEdgeWithWhite.white == '1-0'?$scope.cube.executeAlgorithm(['L\'']):undefined;
+                        firstEdgeWithWhite.white == '1-0'?executeAlgorithm(['L\'']):undefined;
                         switch (avaliableEdges[0]) {
                             case 'right':
-                                $scope.cube.executeAlgorithm(['D\'']);
+                                executeAlgorithm(['D\'']);
                                 break;
                             case 'left':
-                                $scope.cube.executeAlgorithm(['D']);
+                                executeAlgorithm(['D']);
                                 break;
                             case 'back':
-                                $scope.cube.executeAlgorithm(['D2']);
+                                executeAlgorithm(['D2']);
                                 break;
                         }
-                        firstEdgeWithWhite.white == '1-0'?$scope.cube.executeAlgorithm(['L']):undefined;
+                        firstEdgeWithWhite.white == '1-0'?executeAlgorithm(['L']):undefined;
                         solveForLeft()
                     } else {
                         solveForLeft()
@@ -567,19 +606,19 @@ app.controller('cubeController', function($scope) {
                 case 'right':
                     console.log('solving right white piece...');
                     if (bottomWhiteTiles.indexOf('front') >= 0) {
-                        firstEdgeWithWhite.white == '1-2'?$scope.cube.executeAlgorithm(['R\'']):undefined;
+                        firstEdgeWithWhite.white == '1-2'?executeAlgorithm(['R\'']):undefined;
                         switch (avaliableEdges[0]) {
                             case 'right':
-                                $scope.cube.executeAlgorithm(['D\'']);
+                                executeAlgorithm(['D\'']);
                                 break;
                             case 'left':
-                                $scope.cube.executeAlgorithm(['D']);
+                                executeAlgorithm(['D']);
                                 break;
                             case 'back':
-                                $scope.cube.executeAlgorithm(['D2']);
+                                executeAlgorithm(['D2']);
                                 break;
                         }
-                        firstEdgeWithWhite.white == '1-2'?$scope.cube.executeAlgorithm(['R']):undefined;
+                        firstEdgeWithWhite.white == '1-2'?executeAlgorithm(['R']):undefined;
                         solveForRight()
                     } else {
                         solveForRight()
@@ -590,13 +629,13 @@ app.controller('cubeController', function($scope) {
                     if (bottomWhiteTiles.indexOf('front') >= 0) {
                         switch (avaliableEdges[0]) {
                             case 'right':
-                                $scope.cube.executeAlgorithm(['D\'']);
+                                executeAlgorithm(['D\'']);
                                 break;
                             case 'left':
-                                $scope.cube.executeAlgorithm(['D']);
+                                executeAlgorithm(['D']);
                                 break;
                             case 'back':
-                                $scope.cube.executeAlgorithm(['D2']);
+                                executeAlgorithm(['D2']);
                                 break;
                         }
                         solveForUp()
@@ -611,43 +650,59 @@ app.controller('cubeController', function($scope) {
             solveAnEdge()
         }
 
-        var order = [
-            $scope.cube.faces.front[2][1],
-            $scope.cube.faces.right[1][2],
-            $scope.cube.faces.back[0][1],
-            $scope.cube.faces.left[1][0]
-        ];
+        var countBottomEdgesMatch = function() {
+            order = [
+                $scope.cube.faces.front[2][1],
+                $scope.cube.faces.right[1][2],
+                $scope.cube.faces.back[0][1],
+                $scope.cube.faces.left[1][0]
+            ];
+            var centers = ['red', 'green', 'orange', 'blue'],
+                i, edges = {
+                'count': 0,
+                'noneMatchingEdges': [],
+                'positions': ''
+            },
+                indexes = [];
 
-        var neighboursOfRed = getLeftAndRight(order.indexOf('red'));
+            for (i in order) {
+                if (order[i] == centers[i]) {
+                    edges.count++;
+                    indexes.push(i)
+                } else {
+                    edges.noneMatchingEdges.push(centers[i])
+                }
+            }
 
-        if (neighboursOfRed.left == 'blue') {
-            if (neighboursOfRed.right == 'green') {
-                orientCross()
-            } else {
-                $scope.cube.executeAlgorithm(['R\'', 'D\'', 'R', 'D', 'R\'']);
-                orientCross()
+            if (edges.count == 2) {
+                edges.positions = Math.abs(indexes[1] - indexes[0]) == 2?'opposite':'adjacent';
             }
-        } else if (neighboursOfRed.left == 'green') {
-            if (neighboursOfRed.right == 'blue') {
-                $scope.cube.executeAlgorithm(['R2', 'L2', 'D2', 'R2', 'L2']);
-                orientCross()
+            return edges
+        };
+
+        var match = orientCross();
+        
+        if (match.count == 2) {
+            if (match.positions == 'opposite') {
+                match.noneMatchingEdges.indexOf('red')>=0?
+                    executeAlgorithm(['F2', 'B2', 'U2', 'F2', 'B2']):
+                    executeAlgorithm(['R2', 'L2', 'U2', 'R2', 'L2'])
             } else {
-                $scope.cube.executeAlgorithm(['L\'', 'D\'', 'L', 'D', 'L\'']);
-                orientCross()
-            }
-        } else if (neighboursOfRed.left == 'orange') {
-            if (neighboursOfRed.right == 'blue') {
-                $scope.cube.executeAlgorithm(['R\'', 'D\'', 'R', 'D', 'R\'']);
-                orientCross()
-            } else {
-                $scope.cube.executeAlgorithm(['B\'', 'D\'', 'B', 'D', 'B\'']);
-                orientCross()
+                match.noneMatchingEdges.indexOf('red')>=0?
+                    (match.noneMatchingEdges.indexOf('green')>=0?
+                        executeAlgorithm(['F\'', 'D\'', 'F', 'D', 'F\'']):
+                        executeAlgorithm(['F', 'D', 'F\'', 'D\'', 'F'])):
+                    (match.noneMatchingEdges.indexOf('green')>=0?
+                        executeAlgorithm(['B', 'D', 'B\'', 'D\'', 'B']):
+                        executeAlgorithm(['B\'', 'D\'', 'B', 'D', 'B\'']));
             }
         }
-        $scope.cube.steps.one = angular.copy($scope.cube.manualScrambleSteps);
+
+        $scope.cube.steps.one = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
         $scope.cube.manualScrambleSteps = '';
     };
 
+    //step 2
     $scope.cube.bottomCorners = function () {
         $scope.cube.manualScrambleSteps ='';
         $scope.cube.steps.two = '';
@@ -679,6 +734,12 @@ app.controller('cubeController', function($scope) {
                 if (cornerSolved[keys[key]] == true) tempArray.push(keys[key])
             }
             return tempArray
+        };
+
+        var solveACorner = function () {
+            var solvedCorners = getSolvedCorners();
+
+
         }
     };
 
