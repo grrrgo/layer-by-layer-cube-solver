@@ -1,11 +1,9 @@
-/**
- * Created by tzhang on 5/10/17.
- */
 var app = angular.module('app', []);
 
 app.controller('cubeController', function($scope) {
     var tileCount = [0, 1, 2], reverseTileCount = [2, 1, 0];
 
+    //global helpers
     var combineSteps = function (steps) {
         var moves = steps.split(',');
         moves.splice(moves.length - 1, 1);
@@ -43,6 +41,31 @@ app.controller('cubeController', function($scope) {
         });
         console.log('after combining', moves);
         return moves.filter(function(n){ return n != '' }).join(', ')
+    };
+
+    var executeAlgorithm = function (algorithmArray) {
+        console.log(algorithmArray.join(', '));
+        var step;
+        for (var index in algorithmArray) {
+            step = algorithmArray[index];
+            if (step.length == 3) {
+                // X'2
+                $scope.cube[step[0]](true);
+                $scope.cube[step[0]](true);
+            } else if (step.length == 2) {
+                if (step.indexOf('2')>=0) {
+                    // X2
+                    $scope.cube[step[0]]();
+                    $scope.cube[step[0]]();
+                } else {
+                    // X'
+                    $scope.cube[step[0]](true);
+                }
+            } else {
+                // X
+                $scope.cube[step[0]]();
+            }
+        }
     };
 
     $scope.cube = {
@@ -317,31 +340,6 @@ app.controller('cubeController', function($scope) {
                 $scope.cube.faces.up[0][i] = originalRight[0][i];
             }
             $scope.cube.manualScrambleSteps += 'B,'
-        }
-    };
-
-    var executeAlgorithm = function (algorithmArray) {
-        console.log(algorithmArray.join(', '));
-        var step;
-        for (var index in algorithmArray) {
-            step = algorithmArray[index];
-            if (step.length == 3) {
-                // X'2
-                $scope.cube[step[0]](true);
-                $scope.cube[step[0]](true);
-            } else if (step.length == 2) {
-                if (step.indexOf('2')>=0) {
-                    // X2
-                    $scope.cube[step[0]]();
-                    $scope.cube[step[0]]();
-                } else {
-                    // X'
-                    $scope.cube[step[0]](true);
-                }
-            } else {
-                // X
-                $scope.cube[step[0]]();
-            }
         }
     };
 
@@ -736,11 +734,73 @@ app.controller('cubeController', function($scope) {
             return tempArray
         };
 
+        var solveEasyCorner = function(easyCorner) {
+
+        };
+
         var solveACorner = function () {
             var solvedCorners = getSolvedCorners();
 
+            var getTopWhiteCorners = function () {
+                var corners = {
+                    'UFL':{
+                        'U':$scope.cube.faces.up[2][0],
+                        'F':$scope.cube.faces.front[0][0],
+                        'L':$scope.cube.faces.left[2][2]
+                    },
+                    'UFR':{
+                        'U':$scope.cube.faces.up[2][2],
+                        'F':$scope.cube.faces.front[0][2],
+                        'R':$scope.cube.faces.right[2][0]
+                    },
+                    'UBL':{
+                        'U':$scope.cube.faces.up[0][0],
+                        'B':$scope.cube.faces.back[2][0],
+                        'L':$scope.cube.faces.left[0][2]
+                    },
+                    'UBR':{
+                        'U':$scope.cube.faces.up[0][2],
+                        'B':$scope.cube.faces.back[2][2],
+                        'R':$scope.cube.faces.left[0][0]
+                    }
+                };
 
-        }
+                var keys = Object.keys(corners);
+
+                for (var key in keys) {
+                    var subKeys = Object.keys(corners[keys[key]]);
+                    for (var subKey in subKeys) {
+                        if (subKeys[subKey] != 'U' && corners[keys[key]][subKeys[subKey]] == 'white') {
+                            return corners[keys[key]]
+                        }
+                    }
+                }
+
+                return null
+            };
+
+            console.log(getTopWhiteCorners());
+
+            var easyCorner = getTopWhiteCorners();
+
+            if (easyCorner != null) {
+                solveEasyCorner(easyCorner)
+                var keys = Object.keys(easyCorner);
+                for (var key in keys) {
+                    if (easyCorner[keys[key]] == 'white') {
+
+                    }
+                }
+            }
+
+        };
+
+        //while (getSolvedCorners() < 4) {
+            solveACorner()
+        //}
+
+        $scope.cube.steps.two = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
+        $scope.cube.manualScrambleSteps = '';
     };
 
     $scope.cube.reset();
