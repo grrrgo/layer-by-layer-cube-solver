@@ -9,8 +9,8 @@ app.controller('cubeController', function($scope) {
         moves.splice(moves.length - 1, 1);
         console.log('before combining', moves);
         moves.map(function (move, index) {
-            if (index != moves.length - 1) {
-                if (move == moves[index + 1] + '\'' || move + '\'' == moves[index + 1]) {
+            if (index !== moves.length - 1) {
+                if (move === moves[index + 1] + '\'' || move + '\'' === moves[index + 1]) {
                     moves.splice(index, 2)
                 }
             }
@@ -18,7 +18,7 @@ app.controller('cubeController', function($scope) {
         moves.map(function (move, index) {
             var repetition = 1, originalIndex = index;
             while (true) {
-                if (move == moves[index + 1]) {
+                if (move === moves[index + 1]) {
                     repetition += 1;
                     index += 1;
                 } else {
@@ -40,7 +40,7 @@ app.controller('cubeController', function($scope) {
             }
         });
         console.log('after combining', moves);
-        return moves.filter(function(n){ return n != '' }).join(', ')
+        return moves.filter(function(n){ return n !== '' }).join(', ')
     };
 
     var executeAlgorithm = function (algorithmArray) {
@@ -48,11 +48,11 @@ app.controller('cubeController', function($scope) {
         var step;
         for (var index in algorithmArray) {
             step = algorithmArray[index];
-            if (step.length == 3) {
+            if (step.length === 3) {
                 // X'2
                 $scope.cube[step[0]](true);
                 $scope.cube[step[0]](true);
-            } else if (step.length == 2) {
+            } else if (step.length === 2) {
                 if (step.indexOf('2')>=0) {
                     // X2
                     $scope.cube[step[0]]();
@@ -66,6 +66,24 @@ app.controller('cubeController', function($scope) {
                 $scope.cube[step[0]]();
             }
         }
+    };
+
+    var faceColor = {
+        'F': 'red',
+        'L': 'blue',
+        'B': 'orange',
+        'R': 'green',
+        'U': 'yellow',
+        'D': 'white'
+    };
+
+    var colorFace = {
+        'red': 'F',
+        'blue': 'L',
+        'orange': 'B',
+        'green': 'R',
+        'yellow': 'U',
+        'white': 'D'
     };
 
     $scope.cube = {
@@ -535,7 +553,7 @@ app.controller('cubeController', function($scope) {
                 if (firstEdgeWithWhite != undefined) break
             }
 
-            if (firstEdgeWithWhite == undefined) return;
+            if (firstEdgeWithWhite === undefined) return;
 
             switch (firstEdgeWithWhite.face){
                 case 'front':
@@ -664,7 +682,7 @@ app.controller('cubeController', function($scope) {
                 indexes = [];
 
             for (i in order) {
-                if (order[i] == centers[i]) {
+                if (order[i] === centers[i]) {
                     edges.count++;
                     indexes.push(i)
                 } else {
@@ -672,16 +690,16 @@ app.controller('cubeController', function($scope) {
                 }
             }
 
-            if (edges.count == 2) {
-                edges.positions = Math.abs(indexes[1] - indexes[0]) == 2?'opposite':'adjacent';
+            if (edges.count === 2) {
+                edges.positions = Math.abs(indexes[1] - indexes[0]) === 2?'opposite':'adjacent';
             }
             return edges
         };
 
         var match = orientCross();
         
-        if (match.count == 2) {
-            if (match.positions == 'opposite') {
+        if (match.count === 2) {
+            if (match.positions === 'opposite') {
                 match.noneMatchingEdges.indexOf('red')>=0?
                     executeAlgorithm(['F2', 'B2', 'U2', 'F2', 'B2']):
                     executeAlgorithm(['R2', 'L2', 'U2', 'R2', 'L2'])
@@ -710,37 +728,181 @@ app.controller('cubeController', function($scope) {
         var getSolvedCorners = function() {
             cornerSolved = {
                 'FL':
-                $scope.cube.faces.front[2][0] == 'red' &&
-                $scope.cube.faces.left[2][0] == 'blue' &&
-                $scope.cube.faces.down[2][2] == 'white',
+                $scope.cube.faces.front[2][0] === 'red' &&
+                $scope.cube.faces.left[2][0] === 'blue' &&
+                $scope.cube.faces.down[2][2] === 'white',
                 'FR':
-                $scope.cube.faces.front[2][2] == 'red' &&
-                $scope.cube.faces.right[2][2] == 'green' &&
-                $scope.cube.faces.down[2][0] == 'white',
+                $scope.cube.faces.front[2][2] === 'red' &&
+                $scope.cube.faces.right[2][2] === 'green' &&
+                $scope.cube.faces.down[2][0] === 'white',
                 'BL':
-                $scope.cube.faces.back[0][0] == 'orange' &&
-                $scope.cube.faces.left[0][0] == 'blue' &&
-                $scope.cube.faces.down[0][2] == 'white',
+                $scope.cube.faces.back[0][0] === 'orange' &&
+                $scope.cube.faces.left[0][0] === 'blue' &&
+                $scope.cube.faces.down[0][2] === 'white',
                 'BR':
-                $scope.cube.faces.back[0][2] == 'red' &&
-                $scope.cube.faces.right[0][2] == 'green' &&
-                $scope.cube.faces.down[0][0] == 'white'
+                $scope.cube.faces.back[0][2] === 'orange' &&
+                $scope.cube.faces.right[0][2] === 'green' &&
+                $scope.cube.faces.down[0][0] === 'white'
             };
 
             var tempArray = [], keys =Object.keys(cornerSolved);
             for (var key in keys) {
-                if (cornerSolved[keys[key]] == true) tempArray.push(keys[key])
+                if (cornerSolved[keys[key]] === true) tempArray.push(keys[key])
             }
             return tempArray
         };
 
         var solveEasyCorner = function(easyCorner) {
+            var cornerAlgorithms = function (targetSide, whiteSideTile) {
+                switch (targetSide) {
+                    case 'F':
+                        switch (whiteSideTile) {
+                            case 'L':
+                                executeAlgorithm(['R', 'U\'', 'R\'']);
+                                break;
+                            case 'R':
+                                executeAlgorithm(['L\'', 'U', 'L']);
+                                break;
+                        }
+                        break;
+                    case 'L':
+                        switch (whiteSideTile) {
+                            case 'F':
+                                executeAlgorithm(['B\'', 'U', 'B']);
+                                break;
+                            case 'B':
+                                executeAlgorithm(['F', 'U\'', 'F\'']);
+                                break;
+                        }
+                        break;
+                    case 'B':
+                        switch (whiteSideTile) {
+                            case 'L':
+                                executeAlgorithm(['R\'', 'U', 'R']);
+                                break;
+                            case 'R':
+                                executeAlgorithm(['L', 'U\'', 'L\'']);
+                                break;
+                        }
+                        break;
+                    case 'R':
+                        switch (whiteSideTile) {
+                            case 'F':
+                                executeAlgorithm(['B', 'U\'', 'B\'']);
+                                break;
+                            case 'B':
+                                executeAlgorithm(['F\'', 'U', 'F']);
+                                break;
+                        }
+                        break;
+                }
+            };
+
+            var keys =Object.keys(easyCorner),
+                noneWhiteSideTile, whiteSideTile;
+            for (var key in keys) {
+                if (easyCorner[keys[key]] === 'white') {
+                    whiteSideTile = keys[key]
+                } else if (keys[key] !== 'U') {
+                    noneWhiteSideTile = keys[key]
+                }
+            }
+            console.log('noneWhiteSideTile',noneWhiteSideTile);
+            console.log('whiteSideTile',whiteSideTile);
+            var targetSide = colorFace[easyCorner.U];
+            console.log('targetSide',targetSide);
+            if (noneWhiteSideTile === targetSide) {
+                console.log('in position');
+                cornerAlgorithms(targetSide, whiteSideTile)
+            } else {
+                var clockwise = ['F', 'L', 'B', 'R', 'F', 'L', 'B', 'R'], counter = 0;
+                while (noneWhiteSideTile !== targetSide) {
+                    executeAlgorithm(['U']);
+                    noneWhiteSideTile = clockwise[clockwise.indexOf(noneWhiteSideTile) + 1];
+                    counter += 1
+                }
+                var newWhiteSideTile = clockwise[clockwise.indexOf(whiteSideTile) + counter];
+                cornerAlgorithms(targetSide, newWhiteSideTile)
+            }
+
+        };
+
+        var createEasyCorner = function () {
+            var corners = ['BL', 'BR', 'FL', 'FR'];
+            var getTopWhiteCorners = function () {
+                return $scope.cube.faces.up[0][0] === 'white'?'UBL':
+                    $scope.cube.faces.up[0][2] === 'white'?'UBR':
+                        $scope.cube.faces.up[2][0] === 'white'?'UFL':
+                            $scope.cube.faces.up[2][2] === 'white'?'UFR':null;
+
+            };
+
+            var createFromTopWhite = function (topWhites) {
+                switch (topWhites) {
+                    case 'UBL':
+                        executeAlgorithm(['L', 'U\'', 'L\'']);
+                        break;
+                    case 'UBR':
+                        executeAlgorithm(['R\'', 'U', 'R']);
+                        break;
+                    case 'UFL':
+                        executeAlgorithm(['L\'', 'U', 'L']);
+                        break;
+                    case 'UFR':
+                        executeAlgorithm(['R', 'U\'', 'R\'']);
+                        break;
+                }
+            };
+
+            var createTopWhiteFromBottomWhite = function () {
+                var solved = getSolvedCorners(),
+                    unsolved = '';
+                corners.map(function (corner) {
+                    if (solved.indexOf(corner) < 0) {
+                        unsolved = corner
+                    }
+                });
+
+                switch (unsolved) {
+                    case 'FL':
+                        executeAlgorithm(['L\'', 'U\'', 'L']);
+                        break;
+                    case 'FR':
+                        executeAlgorithm(['R', 'U', 'R\'']);
+                        break;
+                    case 'BL':
+                        executeAlgorithm(['L', 'U', 'L\'']);
+                        break;
+                    case 'BR':
+                        executeAlgorithm(['R\'', 'U\'', 'R']);
+                        break;
+                }
+
+            };
+
+            var topWhites = getTopWhiteCorners();
+
+            if (topWhites !== null) {
+                var solved = getSolvedCorners();
+                if (solved.indexOf(topWhites.substr(1,2)) >= 0) {
+                    while (solved.indexOf(topWhites.substr(1,2)) >= 0) {
+                        executeAlgorithm(['U']);
+                        topWhites = getTopWhiteCorners();
+                    }
+                    createFromTopWhite(topWhites)
+                } else {
+                    createFromTopWhite(topWhites)
+                }
+            } else {
+                createTopWhiteFromBottomWhite();
+                createEasyCorner()
+            }
+
+
 
         };
 
         var solveACorner = function () {
-            var solvedCorners = getSolvedCorners();
-
             var getTopWhiteCorners = function () {
                 var corners = {
                     'UFL':{
@@ -761,7 +923,7 @@ app.controller('cubeController', function($scope) {
                     'UBR':{
                         'U':$scope.cube.faces.up[0][2],
                         'B':$scope.cube.faces.back[2][2],
-                        'R':$scope.cube.faces.left[0][0]
+                        'R':$scope.cube.faces.right[0][0]
                     }
                 };
 
@@ -770,7 +932,7 @@ app.controller('cubeController', function($scope) {
                 for (var key in keys) {
                     var subKeys = Object.keys(corners[keys[key]]);
                     for (var subKey in subKeys) {
-                        if (subKeys[subKey] != 'U' && corners[keys[key]][subKeys[subKey]] == 'white') {
+                        if (subKeys[subKey] !== 'U' && corners[keys[key]][subKeys[subKey]] === 'white') {
                             return corners[keys[key]]
                         }
                     }
@@ -783,21 +945,19 @@ app.controller('cubeController', function($scope) {
 
             var easyCorner = getTopWhiteCorners();
 
-            if (easyCorner != null) {
-                solveEasyCorner(easyCorner)
-                var keys = Object.keys(easyCorner);
-                for (var key in keys) {
-                    if (easyCorner[keys[key]] == 'white') {
-
-                    }
-                }
+            if (easyCorner !== null) {
+                solveEasyCorner(easyCorner);
+            } else {
+                createEasyCorner();
+                easyCorner = getTopWhiteCorners();
+                solveEasyCorner(easyCorner);
             }
 
         };
 
-        //while (getSolvedCorners() < 4) {
-            solveACorner()
-        //}
+        while (getSolvedCorners().length < 4) {
+            solveACorner();
+        }
 
         $scope.cube.steps.two = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
         $scope.cube.manualScrambleSteps = '';
