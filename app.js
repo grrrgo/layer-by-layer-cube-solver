@@ -719,7 +719,7 @@ app.controller('cubeController', function($scope) {
     };
 
     //step 2
-    $scope.cube.bottomCorners = function () {
+    $scope.cube.bottomCorners = function() {
         $scope.cube.manualScrambleSteps ='';
         $scope.cube.steps.two = '';
 
@@ -960,6 +960,243 @@ app.controller('cubeController', function($scope) {
         }
 
         $scope.cube.steps.two = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
+        $scope.cube.manualScrambleSteps = '';
+    };
+
+    //step 3
+    $scope.cube.secondLayerEdges = function() {
+        $scope.cube.manualScrambleSteps ='';
+        $scope.cube.steps.three = '';
+
+        var getTopNoneYellowEdges = function () {
+            return $scope.cube.faces.up[2][1] !== 'yellow' && $scope.cube.faces.front[0][1] !== 'yellow'? {
+                'U':$scope.cube.faces.up[2][1], 'F':$scope.cube.faces.front[0][1], 'side': 'F'
+            }:
+                $scope.cube.faces.up[1][0] !== 'yellow' && $scope.cube.faces.left[1][2] !== 'yellow'? {
+                    'U':$scope.cube.faces.up[1][0], 'L':$scope.cube.faces.left[1][2], 'side': 'L'
+                }:
+                $scope.cube.faces.up[0][1] !== 'yellow' && $scope.cube.faces.back[2][1] !== 'yellow'? {
+                    'U':$scope.cube.faces.up[0][1], 'B':$scope.cube.faces.back[2][1], 'side': 'B'
+                }:
+                $scope.cube.faces.up[1][2] !== 'yellow' && $scope.cube.faces.right[1][0] !== 'yellow'?{
+                    'U':$scope.cube.faces.up[1][2], 'R':$scope.cube.faces.left[1][0], 'side': 'R'
+                }:null
+        };
+
+        var getUnsolvedEdges = function () {
+            return $scope.cube.faces.front[1][2] !== 'red'? 'FR':
+                $scope.cube.faces.front[1][0] !== 'red'? 'FL':
+                    $scope.cube.faces.back[1][0] !== 'orange'? 'BL':
+                        $scope.cube.faces.back[1][2] !== 'orange'? 'BR':null
+        };
+
+        var isSolved = function () {
+          return $scope.cube.faces.front[1][2] === 'red' &&
+                  $scope.cube.faces.front[1][0] === 'red' &&
+                  $scope.cube.faces.left[2][1] === 'blue' &&
+                  $scope.cube.faces.left[0][1] === 'blue' &&
+                  $scope.cube.faces.back[1][0] === 'orange' &&
+                  $scope.cube.faces.back[1][2] === 'orange' &&
+                  $scope.cube.faces.right[0][1] ==='green' &&
+                  $scope.cube.faces.right[2][1] === 'green'
+
+
+        };
+
+        var solveEasyTopEdge = function(easyTopEdge) {
+            switch (easyTopEdge.U) {
+                case 'red':
+                    switch (easyTopEdge.side) {
+                        case 'F':
+                            executeAlgorithm(['U', 'U']);
+                            break;
+                        case 'L':
+                            executeAlgorithm(['U']);
+                            break;
+                        case 'R':
+                            executeAlgorithm(['U\'']);
+                            break;
+                    }
+                    if (easyTopEdge[easyTopEdge.side] === 'blue') {
+                        executeAlgorithm(['F', 'U\'', 'F\'', 'U\'', 'L\'', 'U', 'L'])
+                    } else {
+                        executeAlgorithm(['F\'', 'U', 'F', 'U', 'R', 'U\'', 'R\''])
+                    }
+                    break;
+                case 'green':
+                    switch (easyTopEdge.side) {
+                        case 'F':
+                            executeAlgorithm(['U']);
+                            break;
+                        case 'B':
+                            executeAlgorithm(['U\'']);
+                            break;
+                        case 'R':
+                            executeAlgorithm(['U', 'U']);
+                            break;
+                    }
+                    if (easyTopEdge[easyTopEdge.side] === 'red') {
+                        executeAlgorithm(['R', 'U\'', 'R\'', 'U\'', 'F\'', 'U', 'F']);
+                    } else {
+                        executeAlgorithm(['R\'', 'U', 'R', 'U', 'B', 'U\'', 'B\'']);
+                    }
+                    break;
+                case 'orange':
+                    switch (easyTopEdge.side) {
+                        case 'L':
+                            executeAlgorithm(['U\'']);
+                            break;
+                        case 'B':
+                            executeAlgorithm(['U', 'U']);
+                            break;
+                        case 'R':
+                            executeAlgorithm(['U']);
+                            break;
+                    }
+                    if (easyTopEdge[easyTopEdge.side] === 'blue') {
+                        executeAlgorithm(['B\'', 'U', 'B', 'U', 'L', 'U\'', 'L\'']);
+                    } else {
+                        executeAlgorithm(['B', 'U\'', 'B\'', 'U\'', 'R\'', 'U', 'R']);
+                    }
+                    break;
+                case 'blue':
+                    switch (easyTopEdge.side) {
+                        case 'F':
+                            executeAlgorithm(['U\'']);
+                            break;
+                        case 'L':
+                            executeAlgorithm(['U', 'U']);
+                            break;
+                        case 'B':
+                            executeAlgorithm(['U']);
+                            break;
+                    }
+                    if (easyTopEdge[easyTopEdge.side] === 'red') {
+                        executeAlgorithm(['L\'', 'U', 'L', 'U', 'F', 'U\'', 'F\'']);
+                    } else {
+                        executeAlgorithm(['L', 'U\'', 'L\'', 'U\'', 'B\'', 'U', 'B']);
+                    }
+                    break;
+            }
+        };
+        
+        var createEasyTopEdge = function () {
+            switch (getUnsolvedEdges()) {
+                case 'FR':
+                    executeAlgorithm(['R', 'U\'', 'R\'', 'U\'', 'F\'', 'U', 'F']);
+                    break;
+                case 'FL':
+                    executeAlgorithm(['L\'', 'U', 'L', 'U', 'F', 'U\'', 'F\'']);
+                    break;
+                case 'BR':
+                    executeAlgorithm(['L', 'U\'', 'L\'', 'U\'', 'B\'', 'U', 'B']);
+                    break;
+                case 'BL':
+                    executeAlgorithm(['R\'', 'U', 'R', 'U', 'B', 'U\'', 'B\'']);
+                    break;
+            }
+        };
+
+        var solveAnEdge = function () {
+            var easyTopEdge = getTopNoneYellowEdges();
+
+            if (easyTopEdge !== null) {
+                solveEasyTopEdge(easyTopEdge)
+            } else {
+                createEasyTopEdge();
+                solveAnEdge()
+            }
+        };
+
+        while (!isSolved()) {
+            solveAnEdge();
+        }
+
+        $scope.cube.steps.three = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
+        $scope.cube.manualScrambleSteps = '';
+    };
+
+    //step 4
+    $scope.cube.topCross = function() {
+        $scope.cube.manualScrambleSteps ='';
+        $scope.cube.steps.four = '';
+
+        var isCross = function () {
+            return $scope.cube.faces.up[1][0] === 'yellow' &&
+                    $scope.cube.faces.up[1][2] === 'yellow' &&
+                    $scope.cube.faces.up[0][1] === 'yellow' &&
+                    $scope.cube.faces.up[2][1] === 'yellow'
+        };
+
+        var isStraight = function () {
+            return $scope.cube.faces.up[0][1] === 'yellow' &&
+                    $scope.cube.faces.up[2][1] === 'yellow'? 'vertical':
+                $scope.cube.faces.up[1][0] === 'yellow' &&
+                    $scope.cube.faces.up[1][2] === 'yellow'? 'horizontal':null;
+        };
+
+        var isL = function () {
+            return $scope.cube.faces.up[0][1] === 'yellow' &&
+                $scope.cube.faces.up[1][0] === 'yellow'? 'UL':
+                $scope.cube.faces.up[0][1] === 'yellow' &&
+                $scope.cube.faces.up[1][2] === 'yellow'? 'UR':
+                $scope.cube.faces.up[2][1] === 'yellow' &&
+                $scope.cube.faces.up[1][0] === 'yellow'? 'LL':
+                $scope.cube.faces.up[2][1] === 'yellow' &&
+                $scope.cube.faces.up[1][2] === 'yellow'? 'LR': null;
+        };
+
+        var solveForCross = function () {
+            if (isStraight() === 'vertical') {
+                executeAlgorithm(['U', 'F', 'R', 'U', 'R\'', 'U\'', 'F\''])
+            } else if (isStraight() === 'horizontal') {
+                executeAlgorithm(['F', 'R', 'U', 'R\'', 'U\'', 'F\''])
+            } else if (isL() !== null) {
+                switch (isL()) {
+                    case 'UR' :
+                        executeAlgorithm(['U\'']);
+                        break;
+                    case 'LL' :
+                        executeAlgorithm(['U']);
+                        break;
+                    case 'LR' :
+                        executeAlgorithm(['U', 'U']);
+                        break;
+                }
+                executeAlgorithm(['F', 'R', 'U', 'R\'', 'U\'', 'F\'']);
+            } else {
+                executeAlgorithm(['F', 'R', 'U', 'R\'', 'U\'', 'F\'']);
+            }
+        };
+
+        while (!isCross()) {
+            solveForCross()
+        }
+
+        $scope.cube.steps.four = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
+        $scope.cube.manualScrambleSteps = '';
+    };
+
+    //step 5
+    $scope.cube.topFish = function() {
+        $scope.cube.manualScrambleSteps ='';
+        $scope.cube.steps.five = '';
+
+        var isFish = function () {
+            var corners = [[0,0], [0,2], [2,0], [2,2]];
+            var yellowCorners = corners.filter(function(cordinate) {
+                return $scope.cube.faces.up[cordinate[0]][cordinate[1]] == 'yellow'
+            });
+            if (yellowCorners.length === 1) {
+                return true
+            } else {
+                return yellowCorners
+            }
+        };
+
+
+
+        $scope.cube.steps.five = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
         $scope.cube.manualScrambleSteps = '';
     };
 

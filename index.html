@@ -47,6 +47,10 @@
         <button ng-click="cube.cross()">Cross</button>
         <br>
         <button ng-click="cube.bottomCorners()">BottomCorners</button>
+        <br>
+        <button ng-click="cube.secondLayerEdges()">secondLayerEdges</button>
+        <br>
+        <button ng-click="cube.topCross()">topCross</button>
 
         <div class="step-panel">
             <h2>{{cube.scrambleSteps}}</h2>
@@ -55,9 +59,9 @@
             <span ng-if="cube.steps.two">Step two (L1 corners) : {{cube.steps.two}}<br/></span>
             <span ng-if="cube.steps.three">Step three (L2 edges) : {{cube.steps.three}}<br/></span>
             <span ng-if="cube.steps.four">Step four (Top cross) : {{cube.steps.four}}<br/></span>
-            <span ng-if="cube.steps.five">Step five (OLL) : {{cube.steps.five}}<br/></span>
-            <span ng-if="cube.steps.six">Step six (Top corners PLL) : {{cube.steps.six}}<br/></span>
-            <span ng-if="cube.steps.seven">Step seven (Top edges PLL) : {{cube.steps.seven}}</span>
+            <span ng-if="cube.steps.five">Step five (Top "Fish") : {{cube.steps.five}}<br/></span>
+            <span ng-if="cube.steps.six">Step six (OLL) : {{cube.steps.six}}<br/></span>
+            <span ng-if="cube.steps.seven">Step seven (PLL) : {{cube.steps.seven}}</span>
         </div>
 
 
