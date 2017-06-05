@@ -101,6 +101,14 @@ app.controller('cubeController', function($scope) {
         }
     };
 
+    /*$scope.test = function () {
+        while (true) {
+            $scope.cube.scramble();
+            $scope.cube.cross();
+            $scope.cube.bottomCorners()
+        }
+    };*/
+
     $scope.cube.reset = function(){
         $scope.cube.faces.back = [
             ['orange', 'orange', 'orange'],
@@ -887,7 +895,10 @@ app.controller('cubeController', function($scope) {
                 if (solved.indexOf(topWhites.substr(1,2)) >= 0) {
                     while (solved.indexOf(topWhites.substr(1,2)) >= 0) {
                         executeAlgorithm(['U']);
-                        topWhites = getTopWhiteCorners();
+                        topWhites = topWhites === 'UBL'?'UBR':
+                            topWhites === 'UBR'?'UFR':
+                                topWhites === 'UFR'?'UFL':
+                                    topWhites === 'UFL'?'UBL':undefined
                     }
                     createFromTopWhite(topWhites)
                 } else {
@@ -895,7 +906,7 @@ app.controller('cubeController', function($scope) {
                 }
             } else {
                 createTopWhiteFromBottomWhite();
-                createEasyCorner()
+                createFromTopWhite(getTopWhiteCorners())
             }
 
 
@@ -1089,10 +1100,10 @@ app.controller('cubeController', function($scope) {
                     executeAlgorithm(['L\'', 'U', 'L', 'U', 'F', 'U\'', 'F\'']);
                     break;
                 case 'BR':
-                    executeAlgorithm(['L', 'U\'', 'L\'', 'U\'', 'B\'', 'U', 'B']);
+                    executeAlgorithm(['R\'', 'U', 'R', 'U', 'B', 'U\'', 'B\'']);
                     break;
                 case 'BL':
-                    executeAlgorithm(['R\'', 'U', 'R', 'U', 'B', 'U\'', 'B\'']);
+                    executeAlgorithm(['L', 'U\'', 'L\'', 'U\'', 'B\'', 'U', 'B']);
                     break;
             }
         };
@@ -1189,18 +1200,163 @@ app.controller('cubeController', function($scope) {
             });
             if (yellowCorners.length === 1) {
                 return true
+            } else if (yellowCorners.length === 4){
+                return null
             } else {
                 return yellowCorners
             }
         };
+        
+        console.log(isFish());
 
+        var cornerStatus = isFish();
 
-
+        if (cornerStatus !== true && cornerStatus !== null) {
+            if (cornerStatus.length === 2) {
+                while ($scope.cube.faces.back[2][0] !== 'yellow') {
+                    executeAlgorithm(['U'])
+                }
+            }
+            if (cornerStatus.length === 0) {
+                while ($scope.cube.faces.left[0][2] !== 'yellow') {
+                    executeAlgorithm(['U'])
+                }
+            }
+            executeAlgorithm(['R\'', 'U\'', 'R', 'U\'', 'R\'', 'U2', 'R']);
+        }
         $scope.cube.steps.five = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
         $scope.cube.manualScrambleSteps = '';
     };
 
+    //step 6
+    $scope.cube.OLL = function(calledFromPLL) {
+        if (!calledFromPLL) {
+            $scope.cube.manualScrambleSteps = '';
+            $scope.cube.steps.six = '';
+        }
+
+        var isInPosition = function () {
+            return ($scope.cube.faces.up[0][0] === 'yellow' && $scope.cube.faces.right[2][0] === 'yellow') ||
+                ($scope.cube.faces.up[0][2] === 'yellow' && $scope.cube.faces.left[2][2] === 'yellow')
+        };
+
+        if (!(
+                $scope.cube.faces.up[0][0] === 'yellow' &&
+                $scope.cube.faces.up[0][2] === 'yellow' &&
+                $scope.cube.faces.up[2][0] === 'yellow' &&
+                $scope.cube.faces.up[2][2] === 'yellow'
+            )) {
+            while (!isInPosition()) {
+                executeAlgorithm(['U'])
+            }
+
+            if ($scope.cube.faces.up[0][0] === 'yellow') {
+                executeAlgorithm(['R\'', 'U\'', 'R', 'U\'', 'R\'', 'U2', 'R']);
+            } else {
+                executeAlgorithm(['L', 'U', 'L\'', 'U', 'L', 'U2', 'L\''])
+            }
+        }
+
+        if (!calledFromPLL) {
+            $scope.cube.steps.six = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
+            $scope.cube.manualScrambleSteps = '';
+        }
+    };
+
+    //step 7
+    $scope.cube.PLL = function() {
+        $scope.cube.manualScrambleSteps ='';
+        $scope.cube.steps.seven = '';
+
+        var countHeadLights = function () {
+            var headLightCount = 0;
+            var headLightPositions = {
+                'front': [[0, 0], [0, 2]],
+                'right': [[0, 0], [2, 0]],
+                'back': [[2, 0], [2, 2]],
+                'left': [[0, 2], [2, 2]]
+            };
+            for (var face in headLightPositions) {
+                var positions = headLightPositions[face];
+                if ($scope.cube.faces[face][positions[0][0]][positions[0][1]] ===
+                    $scope.cube.faces[face][positions[1][0]][positions[1][1]]
+                ) {
+                    headLightCount += 1
+                }
+            }
+
+            return headLightCount
+        };
+
+        var count = countHeadLights();
+        
+        var solveOneHeadLight = function (alreadyAllHeadLights) {
+            var countPerfectFace = function () {
+                var perfectFaceCount = 0;
+                var facePositions = {
+                    'front': [[0, 0], [0, 1]],
+                    'right': [[0, 0], [1, 0]],
+                    'back': [[2, 0], [2, 1]],
+                    'left': [[0, 2], [1, 2]]
+                };
+                for (var face in facePositions) {
+                    var positions = facePositions[face];
+                    if ($scope.cube.faces[face][positions[0][0]][positions[0][1]] ===
+                        $scope.cube.faces[face][positions[1][0]][positions[1][1]]
+                    ) {
+                        perfectFaceCount += 1
+                    }
+                }
+                return perfectFaceCount
+            };
+
+            while ($scope.cube.faces.back[2][0] !== $scope.cube.faces.back[2][2]) {
+                executeAlgorithm(['U'])
+            }
+            if (!alreadyAllHeadLights){
+                executeAlgorithm(['L', 'F\'', 'L', 'B2', 'L\'', 'F', 'L', 'B2', 'L2'])
+            }
+            var count = countPerfectFace();
+            if (count !== 4) {
+                if (count === 0) {
+                    executeAlgorithm(['R\'', 'U\'', 'R', 'U\'', 'R\'', 'U2', 'R']);
+                    $scope.cube.OLL(true)
+                }
+                while ($scope.cube.faces.front[0][0] !== $scope.cube.faces.front[0][1]) {
+                    executeAlgorithm(['U'])
+                }
+                if ($scope.cube.faces.right[1][0] === $scope.cube.faces.left[2][2]) {
+                    executeAlgorithm(['L', 'U', 'L\'', 'U', 'L', 'U2', 'L\''])
+
+                } else {
+                    executeAlgorithm(['R\'', 'U\'', 'R', 'U\'', 'R\'', 'U2', 'R']);
+                }
+                $scope.cube.OLL(true)
+                while ($scope.cube.faces.front[0][0] !== 'red') {
+                    executeAlgorithm(['U'])
+                }
+            }
+
+        };
+
+        if (count === 0) {
+            executeAlgorithm(['L', 'F\'', 'L', 'B2', 'L\'', 'F', 'L', 'B2', 'L2']);
+            solveOneHeadLight(false);
+        } else if (count === 1) {
+            solveOneHeadLight(false);
+        } else {
+            solveOneHeadLight(true);
+        }
+        
+        console.log('Done!!!!!!');
+
+        $scope.cube.steps.seven = combineSteps(angular.copy($scope.cube.manualScrambleSteps));
+        $scope.cube.manualScrambleSteps = '';
+    };
+
     $scope.cube.reset();
+
+
 
 });
 
